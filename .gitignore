@@ -1,2 +1,3 @@
 *.pyc
 individual
+deck/dependencies*
