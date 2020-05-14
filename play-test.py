@@ -1,10 +1,104 @@
 import csv
 import json
+import random
+import copy
+
+MATRIX_WIDTH = 20
+MATRIX_HEIGHT = MATRIX_WIDTH
+CARDS_PER_PLAYER = 5
 
 ORIENTATION_TOP = 0
 ORIENTATION_RIGHT = 1
 ORIENTATION_BOTTOM = 2
 ORIENTATION_LEFT = 3
+
+class Point:
+  def __init__(self, x, y):
+    self.x = x
+    self.y = y
+
+class Table:
+  def __init__(self, card):
+    self.matrix = [[None for x in range(MATRIX_HEIGHT)] for y in range(MATRIX_HEIGHT)] 
+    self.edge1_pos = Point(MATRIX_WIDTH // 2, MATRIX_HEIGHT // 2)
+    self.edge2_pos = copy.copy(self.edge1_pos)
+    self.put_card(card, self.edge1_pos)
+
+  def get_edge1(self):
+    # TODO: retornar card_info
+    return #get_card(self.edge1_pos)
+
+  def get_edge2(self):
+    return #get_card(self.edge2_pos)
+
+  def get_card(self, point):
+    return self.matrix[point.y][point.x]
+
+  def put_card(self, card, point):
+    self.matrix[point.y][point.x] = card
+
+class CardInfo:
+  def __init__(self, card, empty_sides):
+    pass
+
+class PlayerMove:
+  def __init__(self, card, position, rotation):
+    self.card = card
+    self.position = position
+    self.rotation = rotation
+
+class Player:
+  def __init__(self, table):
+    self.hand = []
+    self.table = table
+
+  def draw_card(self, card):
+    self.hand.append(card)
+
+  def play_card(self):
+    #moves = []
+    #edges = [self.table.get_edge1(), self.table.get_edge2()]
+    #for edge in edges:
+
+
+    raise Exception("Not implemented yet!")
+
+class Match:
+  def __init__(self, cards):
+    self.deck = copy.copy(cards)
+    random.shuffle(self.deck)
+    center_card = self.deck[0]
+    self.deck = self.deck[1:]
+    self.table = Table(center_card)
+    self.players = [Player(self.table), Player(self.table)]
+    self.setup()
+    self.play()
+    self.current_player_idx = 0
+
+  def setup(self):
+    for _ in range(CARDS_PER_PLAYER):
+      for p in range(len(self.players)):
+          card = self.deck[0]
+          self.players[p].draw_card(card)
+          self.deck = self.deck[1:]
+  
+  def play(self):
+    while not self.finished():
+      player = self.get_next_player()
+      player.play_card()
+
+  def get_next_player(self):
+    raise Exception('Not implemented yet!')
+
+  def finished(self):
+    if len(self.deck) == 0:
+      return True
+
+    #for player in self.players:
+    #  if len(player.cards) == 0:
+    #    return True
+    
+    return False
 
 class KlassManager:
   def __init__(self):
@@ -134,4 +228,6 @@ if __name__ == '__main__':
       card = Card(row['object'], klass)
       cards.append(card)
 
+  match = Match(cards)
+  #print(match.players[0].cards)
 # TODO: fazer testes unitários
