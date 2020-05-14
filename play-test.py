@@ -15,7 +15,7 @@ class KlassManager:
       self.klass_name_to_klass[name] = klass
   
   def get_klass(self, name):
-    if name is None:
+    if name is None or name == "":
       return None
     elif name in self.klass_name_to_klass:
       return self.klass_name_to_klass[name]
@@ -31,14 +31,12 @@ class Klass:
     self.superklass = None
     self.subklasses = set()
 
-  def is_subclass_of(self, klass):
-    # TODO: implementar
-    return True
+  def is_descendant_of(self, klass):
+    return self in klass.descendants()
 
   def is_compatible_with(self, klass):
-    # TODO: implementar
     # se é a própria classe ou é uma subclasse dela
-    return klass is not None and klass == self or self in klass.descendants()
+    return klass is not None and (klass == self or self.is_descendant_of(klass))
 
   def add_superklass(self, klass):
     if klass is None:
@@ -60,11 +58,7 @@ class Klass:
     return self.classes[orientation]
 
   def __repr__(self):
-    # TODO: completar implementação
-    top = self.get_klass_at_orientation(ORIENTATION_TOP)
-    right = self.get_klass_at_orientation(ORIENTATION_RIGHT)
     return f"(Class {self.className})"
-    # return f"ClassName: {self.className}, Hierarchy: {self.hierarchy}, LeftVar: {self.leftVar}, TopVar: {self.topVar}, RightVar: {self.rightVar}, BottomVar: {self.bottomVar}"
 
 class Card:
   # 0 < rotation <= 3
@@ -83,20 +77,17 @@ class Card:
     return self.klass.get_klass_at_orientation(klass_orientation)
 
   def can_be_placed_on_top(self, card):
-    # TODO: implementar
-    pass
+    return self.klass.is_descendant_of(card.klass)
 
   def can_be_placed_on(self, orientation, card):
-    # can_be_placed_on(fulano, ORIENTATION_RIGHT)
-    #  fulano:Pessoa
-    #     Objeto
-    #            Pessoa
+    # can_be_placed_on(bob, ORIENTATION_RIGHT, fulano)
+    #  fulano:Pessoa         bob:Construtor
+    #     Objeto                Ferramenta
+    #            Pessoa                     Pessoa
     #
     card_dependency = card.get_klass_at_orientation(orientation)
-    self_dependency = self.get_klass_at_orientation((orientation + 2) % 4)
-    print(f"card {self.klass} dependencies: {card.name} {card_dependency} {card.klass.is_compatible_with(self_dependency)}, {self.name} {self_dependency} {self.klass.is_compatible_with(card_dependency)}")
-
-    return self.klass.is_compatible_with(card_dependency) or card.klass.is_compatible_with(self_dependency)
+    self_dependency = self.get_klass_at_orientation((orientation + 2) % 4) # card a ser jogado precisa ser orientado
+    return self.klass.is_compatible_with(card_dependency) or card.klass.is_compatible_with(self_dependency) # checar condição
 
   def __repr__(self):
     return f"(Card {self.name} ({self.klass.className}))"
@@ -143,22 +134,4 @@ if __name__ == '__main__':
       card = Card(row['object'], klass)
       cards.append(card)
 
-
-  fulano = cards[0]
-  sicrana = cards[1]
-  bob = cards[4]
-
-  print(fulano.get_klass_at_orientation(ORIENTATION_TOP))
-  print(fulano.get_klass_at_orientation(ORIENTATION_RIGHT))
-
-  fulano.rotation = 1
-
-  print(fulano.get_klass_at_orientation(ORIENTATION_TOP))
-  print(fulano.get_klass_at_orientation(ORIENTATION_RIGHT))
-
-  # fulano.rotation = 1
-  print(bob.can_be_placed_on(ORIENTATION_RIGHT, fulano))
-  print(manager.get_klass("Pessoa").descendants())
-  # print(fulano.can_be_placed_on(ORIENTATION_TOP, sicrana))
-  # pessoa = manager.get_klass("Construtor")
-  # print(pessoa)
+# TODO: fazer testes unitários
