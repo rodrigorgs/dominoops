@@ -29,13 +29,16 @@ class Tests(unittest.TestCase):
     fulano = cards[0]
     sicrana = cards[1]
     result = False
-    self.assertEqual(result, fulano.can_be_placed_on(sim.ORIENTATION_TOP, sicrana))
+    self.assertEqual(result, fulano.can_be_placed_on_top(sicrana))
 
   def test_can_be_placed_on_top_2(self):
     fulano = cards[0]
     bob = cards[4]
     result = True
-    self.assertEqual(result, bob.can_be_placed_on(sim.ORIENTATION_TOP, fulano))
+    self.assertEqual(result, bob.can_be_placed_on_top(fulano))
+
+  
+# TODO: fazer MAIS testes unitários
     
 if __name__ == '__main__':
 

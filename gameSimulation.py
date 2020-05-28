@@ -248,8 +248,5 @@ if __name__ == '__main__':
   ##########################
   #match = Match(cards)
   #print(match.players[0].cards)
-  fulano = cards[0]
-  bob = cards[4]
-  print(bob.can_be_placed_on(ORIENTATION_TOP, fulano))
-# TODO: fazer testes unitários
+  
   #unittest.main()
