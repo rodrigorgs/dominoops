@@ -11,13 +11,13 @@ chimbinha,Musico
 riquelme,Musico
 belMarques,Musico
 ,
-verde,Cor
 vermelho,Cor
 azul,Cor
 amarelo,Cor
 ,
 barraquinha,Loja
 camelo,Loja
+livraria,Loja
 ,
 foxtrot,LojaInstrumento
 tresTons,LojaInstrumento
@@ -34,7 +34,6 @@ mesa,Objeto
 guitarra,Instrumento
 baixo,Instrumento
 bateria,Instrumento
-flauta,Instrumento
 ,
 chaveFenda,Ferramenta
 furadeira,Ferramenta
