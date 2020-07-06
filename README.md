@@ -16,8 +16,12 @@ The card deck is defined by the data in `base-classes.csv` and `base-objects.csv
 
 - Open [Tabletop Simulator](https://www.tabletopsimulator.com/)
 - Create a single player game
-- Create a custom deck and import the images for the front and back (you may need to upload them somewhere or to start a local web server)
+- Create a custom deck and import the images for the front
+  - URL for the front: <https://rodrigorgs.github.io/dominoops/deck/deck.png>
+  - Size: 10 x 7
+  - URL for the back: <https://rodrigorgs.github.io/dominoops/deck/back.png>
 - Create a custom card and import the arrow card image
+  - URL: <https://rodrigorgs.github.io/dominoops/deck/arrow.png>
 
 ## Rules
 
