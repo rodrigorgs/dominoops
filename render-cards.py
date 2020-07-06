@@ -3,6 +3,7 @@ import os
 import sys
 import glob
 import re
+from PIL import Image, ImageDraw
 
 templateSvg = None
 with open('card.svg') as file:
@@ -30,17 +31,28 @@ def load_images():
 
 def image_name(class_name):
     if len(class_name) == 0:
-        return ''
+        return 'blank'
     else:
         return 'image--' + class_name
+
+def create_blank_image():
+    image = Image.new('RGBA', (80, 80), (255, 0, 0, 0))
+    image.save('individual/blank.png')
 
 ##################################################
 
 if not os.path.exists('individual'):
     os.mkdir('individual')
 
+create_blank_image()
 classes = load_classes('base-classes.csv')
 images = load_images()
+
+def render_attribute(card, orientation):
+    if card[orientation + 'Class'] == '':
+        return quote('')
+    else:
+        return quote("" +   card[orientation + 'Var'] + " : " + card[orientation + 'Class'])
 
 with open('base-objects.csv') as csvFile:
     objects = csv.DictReader(csvFile)
@@ -60,11 +72,11 @@ with open('base-objects.csv') as csvFile:
         svg = svg.replace('>name<', quote(obj['object']))
         svg = svg.replace('>hierarchy<', quote(' ⇾ '.join(hierarchyList)))
         # ↓
-        svg = svg.replace('>left<', quote("" +   card['leftVar'] + " : " + card['leftClass']))
-        svg = svg.replace('>right<', quote("" +  card['rightVar'] + " : " + card['rightClass']))
-        svg = svg.replace('>top<', quote("" +    card['topVar'] + " : " + card['topClass']))
-        svg = svg.replace('>bottom<', quote("" + card['bottomVar'] + " : " + card['bottomClass']))
-
+        svg = svg.replace('>left<', render_attribute(card, 'left'))
+        svg = svg.replace('>right<', render_attribute(card, 'right'))
+        svg = svg.replace('>top<', render_attribute(card, 'top'))
+        svg = svg.replace('>bottom<', render_attribute(card, 'bottom'))
+        
         svg = svg.replace('xlink:href="image--left.png"', f'xlink:href="{image_name(card["leftClass"])}.png"')
         svg = svg.replace('xlink:href="image--right.png"', f'xlink:href="{image_name(card["rightClass"])}.png"')
         svg = svg.replace('xlink:href="image--top.png"', f'xlink:href="{image_name(card["topClass"])}.png"')
@@ -73,7 +85,8 @@ with open('base-objects.csv') as csvFile:
 
         with open('individual/custom.svg', 'w') as customFile:
             customFile.write(svg)
-        
         inpath = os.path.abspath('individual/custom.svg')
         outpath = os.path.abspath(f"individual/card--{obj['object']}.png")
         os.system(f"inkscape --export-type=png --export-filename={outpath} {inpath}")
+
+        
