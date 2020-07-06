@@ -24,4 +24,4 @@ with open('base-objects.csv') as csvFile:
 
             inpath = os.path.abspath('images.svg')
             outpath = os.path.abspath(f"individual/image--{klass}.png")
-            os.system(f"inkscape --without-gui --export-id={klass} --export-png={outpath} {inpath}")
+            os.system(f"inkscape --export-id={klass} --export-type=png --export-filename={outpath} {inpath}")

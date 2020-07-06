@@ -76,4 +76,4 @@ with open('base-objects.csv') as csvFile:
         
         inpath = os.path.abspath('individual/custom.svg')
         outpath = os.path.abspath(f"individual/card--{obj['object']}.png")
-        os.system(f"inkscape --without-gui --export-png={outpath} {inpath}")
+        os.system(f"inkscape --export-type=png --export-filename={outpath} {inpath}")

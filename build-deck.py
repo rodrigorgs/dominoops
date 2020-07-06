@@ -41,4 +41,4 @@ back.save('deck/back.png')
 # Build arrow
 inpath = os.path.abspath('arrow.svg')
 outpath = os.path.abspath('deck/arrow.png')
-os.system(f"inkscape --without-gui --export-png={outpath} {inpath}")
+os.system(f"inkscape --export-type=png --export-filename={outpath} {inpath}")
