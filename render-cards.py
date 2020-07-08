@@ -3,6 +3,7 @@ import os
 import sys
 import glob
 import re
+import unidecode
 from PIL import Image, ImageDraw
 
 templateSvg = None
@@ -33,7 +34,7 @@ def image_name(class_name):
     if len(class_name) == 0:
         return 'blank'
     else:
-        return 'image--' + class_name
+        return 'image--' + unidecode.unidecode(class_name)
 
 def create_blank_image():
     image = Image.new('RGBA', (80, 80), (255, 0, 0, 0))

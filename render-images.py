@@ -1,6 +1,7 @@
 import csv
 import os
 import sys
+import unidecode
 
 if not os.path.exists('individual'):
     os.mkdir('individual')
@@ -19,9 +20,10 @@ print(classes)
 
 with open('base-objects.csv') as csvFile:
     for klass in classes.union({'undefined'}):
+        klass = unidecode.unidecode(klass)
         if f'id="{klass}"' in templateSvg:
             print(klass)
 
             inpath = os.path.abspath('images.svg')
             outpath = os.path.abspath(f"individual/image--{klass}.png")
-            os.system(f"inkscape --export-id={klass} --export-type=png --export-filename={outpath} {inpath}")
+            os.system(f"inkscape --export-id={klass} --export-type=png --export-filename='{outpath}' {inpath}")

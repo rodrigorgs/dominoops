@@ -1,6 +1,7 @@
 import os
 import sys
 import glob
+import csv
 from PIL import Image, ImageDraw
 
 MAX_COLS = 10
@@ -11,17 +12,25 @@ CARD_HEIGHT = 400
 deck = Image.new('RGB', (CARD_WIDTH * MAX_COLS, CARD_HEIGHT * MAX_ROWS), color = 'white')
 
 x, y = (0, 0)
-for filename in glob.glob("individual/card--*.png"):
-    with Image.open(filename) as image:
-        deck.paste(image, (x * CARD_WIDTH, y * CARD_HEIGHT))
 
-    x += 1
-    if x == MAX_COLS:
-        x = 0
-        y += 1
-        if y == MAX_ROWS:
-            print("Too many cards in the deck.")
-            sys.exit(0)
+with open('base-objects.csv') as csvFile:
+    objects = csv.DictReader(csvFile)
+    for obj in objects:
+        if len(obj['object'].strip()) == 0 or len(obj['class'].strip()) == 0:
+            continue
+        filename = f"individual/card--{obj['object']}.png"
+
+# for filename in glob.glob("individual/card--*.png"):
+        with Image.open(filename) as image:
+            deck.paste(image, (x * CARD_WIDTH, y * CARD_HEIGHT))
+
+        x += 1
+        if x == MAX_COLS:
+            x = 0
+            y += 1
+            if y == MAX_ROWS:
+                print("Too many cards in the deck.")
+                sys.exit(0)
 
 if not os.path.exists('deck'):
     os.mkdir('deck')
