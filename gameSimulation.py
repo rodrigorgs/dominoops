@@ -12,31 +12,68 @@ ORIENTATION_TOP = 0
 ORIENTATION_RIGHT = 1
 ORIENTATION_BOTTOM = 2
 ORIENTATION_LEFT = 3
+ORIENTATIONS = [ORIENTATION_TOP, ORIENTATION_RIGHT, ORIENTATION_BOTTOM, ORIENTATION_LEFT]
 
 class Point:
   def __init__(self, x, y):
     self.x = x
     self.y = y
+  
+  def with_offset(self, p):
+    return Point(self.x + p.x, self.y + p.y)
+
+  def __eq__(self, p):
+    return self.x == p.x and self.y == p.y
+  
+  def __hash__(self):
+    return 0  # TODO
+
+  def __str__(self):
+    return "Point(" + str(self.x) + ", " + str(self.y) + ")"
+
+orientation_to_offset = {
+  ORIENTATION_TOP: Point(0, -1),
+  ORIENTATION_BOTTOM: Point(0, 1),
+  ORIENTATION_LEFT: Point(-1, 0),
+  ORIENTATION_RIGHT: Point(1, 0)
+}
+
+offset_to_orientation = {
+  Point(0, -1): ORIENTATION_TOP,
+  Point(0, 1): ORIENTATION_BOTTOM,
+  Point(-1, 0): ORIENTATION_LEFT,
+  Point(1, 0): ORIENTATION_RIGHT,
+}
 
 class Table:
   def __init__(self, card):
     self.matrix = [[None for x in range(MATRIX_HEIGHT)] for y in range(MATRIX_HEIGHT)] 
     self.edge1_pos = Point(MATRIX_WIDTH // 2, MATRIX_HEIGHT // 2)
     self.edge2_pos = copy.copy(self.edge1_pos)
-    self.put_card(card, self.edge1_pos)
-
-  def get_edge1(self):
-    # TODO: retornar card_info
-    return #get_card(self.edge1_pos)
-
-  def get_edge2(self):
-    return #get_card(self.edge2_pos)
+    self.put_card(card, self.edge1_pos, None)
 
   def get_card(self, point):
     return self.matrix[point.y][point.x]
+  
+  def get_card_at_orientation(self, point, orientation):
+    # ex.: se point é (5, 7) e orientation é ORIENTATION_TOP,
+    # então vai retornar carta no ponto (5, 6) 
+    pass
 
-  def put_card(self, card, point):
+  # Put card "card" on position "point", connected to the card in position "edge_point"
+  def put_card(self, card, point, edge_point):
+    # TODO: checar se pode colocar a carta lá
+    
     self.matrix[point.y][point.x] = card
+
+    if edge_point is not None:
+      if edge_point == self.edge1_pos:
+        self.edge1_pos = copy.copy(point)
+      else:
+        self.edge2_pos = copy.copy(point)    
+
+  def get_available_orientations_for_card_at_position(self, point):
+      return [x for x in ORIENTATIONS if self.get_card(point.with_offset(orientation_to_offset[x])) is None]
 
 class CardInfo:
   def __init__(self, card, empty_sides):
@@ -57,12 +94,39 @@ class Player:
     self.hand.append(card)
 
   def play_card(self):
-    #moves = []
-    #edges = [self.table.get_edge1(), self.table.get_edge2()]
-    #for edge in edges:
+    moves = []
+    # para cada uma das duas extremidades
+    for p in [self.table.edge1_pos, self.table.edge2_pos]:
+      card = self.table.get_card(p)
+      orientacoes_livres = self.table.get_available_orientations_for_card_at_position(p)
+      # para cada uma das laterais da carta
+      for orientation in orientacoes_livres:
+        attr_klass = card.get_klass_at_orientation(orientation)
+        print(attr_klass)
+        # considera cada uma das cartas do jogador
+        for player_card in self.hand:
+          # considera cada um dos lados da carta do jogador
+          for player_card_orientation in ORIENTATIONS:
+            player_attr_klass = player_card.get_klass_at_orientation(player_card_orientation)
+            
+            if player_attr_klass is not None and player_attr_klass.is_compatible_with(attr_klass):
+              # movimento válido!
+              player_pos = p.with_offset(orientation_to_offset[orientation])
+              m = PlayerMove(player_card, player_pos, 0)   # TODO: trocar 0 pela orientação correta (CALCULAR!)
+              print("Move: " + str(player_card) + ", " + str(player_pos))
+              moves.append(m)
+            elif attr_klass is not None and attr_klass.is_compatible_with(player_attr_klass):
+              # TODO
+              pass
+      #     # considera jogada de upgrade
+      #     if player_card.klass.can_be_placed_on_top(card):
+      #       # TODO: checar adjacências
+      #       pass
+            
+        
 
 
-    raise Exception("Not implemented yet!")
+    # raise Exception("Not implemented yet!")
 
 class Match:
   def __init__(self, cards):
@@ -73,7 +137,7 @@ class Match:
     self.table = Table(center_card)
     self.players = [Player(self.table), Player(self.table)]
     self.setup()
-    self.play()
+    # self.play()
     self.current_player_idx = 0
 
   def setup(self):
@@ -89,14 +153,15 @@ class Match:
       player.play_card()
 
   def get_next_player(self):
-    raise Exception('Not implemented yet!')
+    pass
+    #raise Exception('Not implemented yet!')
 
   def finished(self):
     if len(self.deck) == 0:
       return True
 
     #for player in self.players:
-    #  if len(player.cards) == 0:
+    #  if len(player.hand) == 0:
     #    return True
     
     return False
@@ -246,7 +311,12 @@ if __name__ == '__main__':
       cards.append(card)
       
   ##########################
-  #match = Match(cards)
-  #print(match.players[0].cards)
+  match = Match(cards)
+
+  match.table.put_card(match.deck[0], match.table.edge1_pos.with_offset(Point(1, 0)), match.table.edge1_pos)
+  # print(match.table.edge1_pos)
+  # print(match.table.edge2_pos)
+  #print(match.players[0].hand)
+  match.players[0].play_card()
   
   #unittest.main()
