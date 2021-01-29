@@ -14,6 +14,10 @@ deck = Image.new('RGB', (CARD_WIDTH * MAX_COLS, CARD_HEIGHT * MAX_ROWS), color =
 x, y = (0, 0)
 
 with open('base-objects.csv') as csvFile:
+    if not os.path.isdir('individual'):
+        print("Folder `individual` does not exist.")
+        print("You need to run render-images.py and render-cards.py before building the deck.")
+        sys.exit(1)
     objects = csv.DictReader(csvFile)
     for obj in objects:
         if len(obj['object'].strip()) == 0 or len(obj['class'].strip()) == 0:
