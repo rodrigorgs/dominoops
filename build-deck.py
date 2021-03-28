@@ -9,7 +9,7 @@ MAX_ROWS = 7
 CARD_WIDTH = 400
 CARD_HEIGHT = 400
 
-deck = Image.new('RGB', (CARD_WIDTH * MAX_COLS, CARD_HEIGHT * MAX_ROWS), color = 'white')
+deck = Image.new('RGBA', (CARD_WIDTH * MAX_COLS, CARD_HEIGHT * MAX_ROWS), color = None)
 
 x, y = (0, 0)
 

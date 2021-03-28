@@ -6,6 +6,8 @@ import re
 import unidecode
 from PIL import Image, ImageDraw
 
+RENDER_CLASS_NAMES = False
+
 templateSvg = None
 with open('card.svg') as file:
     templateSvg = file.read()
@@ -53,7 +55,10 @@ def render_attribute(card, orientation):
     if card[orientation + 'Class'] == '':
         return quote('')
     else:
-        return quote("" +   card[orientation + 'Var'] + " : " + card[orientation + 'Class'])
+        label = "" +   card[orientation + 'Var']
+        if RENDER_CLASS_NAMES:
+            label += " : " + card[orientation + 'Class']
+        return quote(label)
 
 with open('base-objects.csv') as csvFile:
     objects = csv.DictReader(csvFile)
