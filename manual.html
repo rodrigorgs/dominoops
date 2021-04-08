@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dominoops - Manual</title>
+  <meta charset="utf-8" />
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      max-width: 720px;
+      margin: 0px auto;
+    }
+    h2 {
+      text-decoration: underline dashed gray;
+      text-transform: uppercase;
+    }
+    b {
+      color: darkred;
+    }
+    tt {
+      font-family: ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", "Oxygen Mono", "Ubuntu Monospace", "Source Code Pro", "Fira Mono", "Droid Sans Mono", "Courier New", monospace;
+      background-color: antiquewhite;
+    }
+    .board {
+      /* padding: 1em; */
+      background-color: antiquewhite;
+      margin: 16px auto;
+      display: block;
+    }
+    .hint {
+      background-color: gold;
+      padding: 10px;
+      border-left: 5px goldenrod solid;
+    }
+  </style>
+  <script>
+    class Deck {
+      constructor(deckImgElem, numCards, cardWidth, cardHeight, nCols, scale) {
+        this.numCards = numCards;
+        this.imageData = Array(numCards);
+        this.imageElems = Array(numCards);
+
+        const canvas = document.createElement('canvas');
+        canvas.width = cardWidth * scale;
+        canvas.height = cardHeight * scale;
+        const ctx = canvas.getContext('2d');
+
+        for (let id = 0; id < numCards; id++) {
+          const y = Math.floor(id / nCols);
+          const x = id % nCols;
+          ctx.beginPath();
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(deckImgElem, x * cardWidth, y * cardHeight, cardWidth , cardHeight, 0, 0, cardWidth * scale, cardHeight * scale);
+          ctx.fill();
+
+          const imageData = canvas.toDataURL('image/png');
+          this.imageData[id] = imageData;
+
+          const imageElem = document.createElement('img');
+          imageElem.src = imageData;
+          this.imageElems[id] = imageElem;
+        }
+      }
+
+      getCardImageElem(id) {
+        return this.imageElems[id];
+      }
+    }
+    
+    function strike(canvas) {
+      /** @type {CanvasRenderingContext2D} */
+      const ctx = canvas.getContext('2d');
+
+      ctx.beginPath();
+      ctx.strokeStyle = 'red';
+      ctx.moveTo(0, 0);
+      ctx.lineTo(canvas.width, canvas.height);
+      ctx.moveTo(0, canvas.height);
+      ctx.lineTo(canvas.width, 0);
+      ctx.stroke();
+    }
+    function drawImage(ctx, image, x, y, w, h, degrees){
+      ctx.save();
+      ctx.translate(x+w/2, y+h/2);
+      ctx.rotate(degrees*Math.PI/180.0);
+      ctx.translate(-x-w/2, -y-h/2);
+      ctx.drawImage(image, x, y, w, h);
+      ctx.restore();
+    }
+    function createBoard(deck, cols, rows, canvas, cards) {      
+      const padding = 10;
+      const ctx = canvas.getContext('2d');
+      canvas.width = 140 * cols + 60 + 2 * padding;
+      canvas.height = 140 * rows + 60 + 2 * padding;
+
+      const sortedCards = cards.map(c => Object.assign({zindex: 0}, c)).sort((a, b) => a.zindex - b.zindex);
+      for (const c of sortedCards) {
+        const card = Object.assign({zindex: 1, highlight: false, rotation: 0}, c);
+        if (card.id !== undefined) {
+          console.log(card)
+          const img = deck.getCardImageElem(card.id)
+
+          ctx.save();
+          ctx.beginPath();
+          if (card.highlight) {
+            ctx.shadowOffsetX = 5;
+            ctx.shadowOffsetY = 5;
+            ctx.shadowBlur = 5;
+            ctx.shadowColor = 'black';
+          }
+          drawImage(ctx, img, padding + card.x * 140, padding + card.y * 140, 200, 200, card.rotation * 90)
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+    }
+  </script>
+</head>
+<body>
+  <img id="imgDeck" src="deck/deck.png" style="display: none;">
+  <script>
+    const deck = new Deck(document.getElementById('imgDeck'), 30, 400, 400, 10, 0.5);
+  </script>
+
+  <h1>Manual do jogo Dominoops</h1>
+
+  <p>Em Dominoops, de 2 a 4 jogadores alternam-se em turnos,
+    buscando conectar uma das cartas na mão com uma das cartas
+    da mesa. O primeiro jogador a ficar sem cartas vence a partida.</p>
+  
+  <h2>Conceitos</h2>
+
+  <h3>Cartas</h3>
+
+  <p>O jogo consiste de um baralho com 30 <b>cartas</b>.</p>
+
+  <p>
+    Cada carta representa uma entidade do mundo real, que pode ser
+    do tipo <tt>Pessoa</tt>, <tt>Loja</tt>, <tt>Objeto</tt>, <tt>Cor</tt>, dentre outros. Abaixo, o exemplo da carta <tt>camelô</tt>, do tipo <tt>Loja</tt> (representado pelo desenho de uma casa).
+  </p>
+    
+  <canvas class="board"></canvas>
+  <script>
+    createBoard(deck, 3, 1, document.currentScript.previousElementSibling,
+      [
+        {'id': 13, x: 1, y: 0, highlight: true, rotation: 1},
+      ]);
+  </script>
+  
+  <h3>Atributos</h3>
+
+  <p>Cada carta possui 4 <b>lados</b>, e alguns desses lados representam um <b>atributo</b>. O atributo possui um nome e um tipo, representado pela imagem.</p>
+
+  <p>No exemplo, a carta <tt>camelô</tt> tem dois atributos, <tt>vende</tt> e <tt>temDono</tt>. Dizemos que</p>
+
+  <ul>
+    <li><tt>camelô</tt> vende um <tt>Objeto</tt> (representado pelo desenho de uma mão)</li>
+    <li><tt>camelô</tt> tem dono, que é uma <tt>Pessoa</tt> (representada pelo desenho de uma pessoa)</li>
+  </ul>
+
+  <h3>Conexão entre cartas</h3>
+
+  <p>Uma carta pode se conectar a outra através de um de seus atributos.</p>
+
+  <p>Para conectar duas cartas, um dos lados de uma carta deve cobrir um dos lados da outra carta. O lado que fica em cima é o atributo através do qual a conexão é feita.</p>
+
+  <p>No exemplo anterior, podemos jogar a carta <tt>fulano</tt> <b>abaixo</b> do lado direito da carta <tt>camelô</tt>, de forma a conectar o atributo <tt>temDono</tt> de <tt>camelô</tt> à carta <tt>fulano</tt>. A interpretação disso é que o <tt>camelô</tt> tem dono, que é <tt>fulano</tt>.</p>
+
+  <canvas class="board"></canvas>
+  <script>
+    createBoard(deck, 3, 1, document.currentScript.previousElementSibling,
+      [
+        {'id': 0, x: 2, y: 0, highlight: true},
+        {'id': 13, x: 1, y: 0, rotation: 1},
+      ]);
+  </script>
+
+  <p>Outra opção é <b>girar</b> a carta <tt>fulano</tt> e posicioná-la <b>sobre</b> o lado direito de <tt>camelô</tt>, como mostra a imagem:</p>
+
+  <canvas class="board"></canvas>
+  <script>
+    createBoard(deck, 3, 1, document.currentScript.previousElementSibling,
+      [
+        {'id': 13, x: 1, y: 0, rotation: 1},
+        {'id': 0, x: 2, y: 0, highlight: true, rotation: 1},
+      ]);
+  </script>
+
+  <p>Nesse caso, a interpretação é que <tt>fulano</tt> frequenta o <tt>camelô</tt>.</p>
+
+  <p class="hint">Note que, no exemplo acima, <tt>fulano</tt> cobriu o atributo <tt>temDono</tt> de <tt>camelô</tt>. Isso é permitido no jogo.</p>
+
+  <h3>Tipos e subtipos</h3>
+
+  <p>A imagem abaixo mostra todos os tipos de cartas disponíveis no jogo Dominoops. O baralho consiste de 3 cartas de cada tipo.</p>
+
+  <img src="hierarchy.png" width="400" style="display: block; margin: 0 auto;">
+
+  <p>Na imagem, as linhas ligam os <b>tipos</b> (acima) a seus <b>subtipos</b> (abaixo). Por exemplo, o tipo <tt>Pessoa</tt> possui dois subtipos: <tt>Construtor</tt> e <tt>Músico</tt>.</p>
+
+  <h3>Conexões envolvendo subtipos</h3>
+
+  <p>Podemos conectar um atributo a uma carta se...</p>
+
+  <ul>
+    <li>... a carta for do mesmo tipo do atributo; <b>ou</b> se</li>
+    <li>... a carta for de um subtipo do tipo do atributo</li>
+  </ul>
+
+  <p>Por exemplo, o atributo <tt>temFilho</tt>, que é do tipo <tt>Pessoa</tt>, pode se conectar a um <tt>Músico</tt>, pois <tt>Músico</tt> é subtipo de <tt>pessoa</tt>:</p>
+
+  <!-- TODO -->
+  <canvas class="board"></canvas>
+  <script>
+    createBoard(deck, 3, 1, document.currentScript.previousElementSibling,
+      [
+        {'id': 7, x: 2, y: 0, rotation: 1},
+        {'id': 0, x: 1, y: 0, highlight: true},
+      ]);
+  </script>
+
+  <p>Por outro lado, o atributo <tt>vende</tt>, do tipo <tt>Instrumento</tt>, não pode se conectar a um <tt>Objeto</tt>, pois <tt>Objeto</tt> <b>NÃO É</b> subtipo de <tt>Instrumento</tt> (o contrário seria verdadeiro: <tt>Instrumento</tt> é subtipo de <tt>Objeto</tt>).</p>
+
+  <canvas class="board"></canvas>
+  <script>
+    createBoard(deck, 3, 1, document.currentScript.previousElementSibling,
+      [
+        {'id': 21, x: 2, y: 0, rotation: 0, highlight: true},
+        {'id': 15, x: 1, y: 0, rotation: 2},
+      ]);
+    strike(document.currentScript.previousElementSibling);
+  </script>
+
+  <h2>Partida</h2>
+
+  <h3>Preparação</h3>
+
+  <p>No início do jogo o deque é embaralhado e cada jogador recebe 5 cartas. O restante das cartas forma o monte, com a face voltada para baixo. A carta do topo do monte é então posicionada no centro da mesa, virada com a face para cima.</p>
+
+  <h3>Movimentação</h3>
+
+  O primeiro a jogar é definido por sorteio, e a partir daí os jogadores alternam-se em turnos<!--, em sentido anti-horário-->.
+  
+  Em seu turno, o jogador deve jogar na mesa uma das cartas que tem na mão, conectando-a a alguma <b>ponta</b> da mesa, e então passar a vez para o próximo jogador.
+
+  Uma <b>ponta</b> é uma carta que participa de no máximo uma conexão. Após a primeira carta jogada, a mesa possui sempre duas pontas.
+  
+  No exemplo abaixo, as pontas são as cartas <tt>camelô</tt> e <tt>sicrana</tt>.
+
+  <canvas class="board"></canvas>
+  <script>
+    createBoard(deck, 3, 2, document.currentScript.previousElementSibling,
+      [
+        {'id': 0, x: 2, y: 0},
+        {'id': 1, x: 2, y: 1, rotation: -1},
+        {'id': 13, x: 1, y: 0, rotation: 1},
+      ]);
+  </script>
+  
+  Também não é permitido jogar uma carta que se conecte a mais de uma carta. Exemplo:
+
+  <canvas class="board"></canvas>
+  <script>
+    createBoard(deck, 3, 2, document.currentScript.previousElementSibling,
+      [
+        {'id': 21, x: 1, y: 1, rotation: 0, highlight: true},
+        {'id': 0, x: 2, y: 0},
+        {'id': 1, x: 2, y: 1, rotation: -1},
+        {'id': 13, x: 1, y: 0, rotation: 1},
+      ]);
+    strike(document.currentScript.previousElementSibling);
+  </script>
+
+  Se o jogador não puder fazer nenhuma jogada válida, ele deve <b>cavar</b> uma carta do monte. Se essa carta puder ser jogada, ele deve jogá-la; caso contrário, deve <b>passar a vez</b>.
+
+  <h3>Condição de vitória</h3>
+
+  <p>
+    O jogador que ficar sem cartas vence a partida e ganha um ponto<!--, além de ser o primeiro a jogar na próxima partida-->. Se o monte se esgotar e todos os jogadores passarem a vez, a partida se encerra e ninguém pontua.
+  </p>
+    
+</body>
+</html>
